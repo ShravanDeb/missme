@@ -292,7 +292,7 @@ function SendPage() {
 
   const displayedTaps = localTapCount ?? taps;
   const label = useMemo(() => displayedTaps.toLocaleString(), [displayedTaps]);
-  const countLabel = displayedTaps === 1 ? "time you've missed me" : "times you've missed me";
+  const countLabel = "times you've missed them";
   const hearts = ["❤️", "🌸", "💗", "🌷", "💕", "✨", "🩷", "💖"];
 
   useEffect(() => { setLocalTapCount(taps); }, [taps, roomId]);
@@ -504,6 +504,40 @@ function NotFoundPage() {
   );
 }
 
+function SiteFooter() {
+  return (
+    <footer className="site-footer">
+      <p className="site-footer-text">Created by Shravan Deb</p>
+      <div className="site-footer-links" aria-label="Social links">
+        <a
+          href="https://instagram.com/shravnnn.d"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Instagram"
+          className="site-footer-link"
+        >
+          <svg viewBox="0 0 24 24" className="site-footer-icon" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3.5" y="3.5" width="17" height="17" rx="5" stroke="currentColor" strokeWidth="1.8" />
+            <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.8" />
+            <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" />
+          </svg>
+        </a>
+        <a
+          href="https://github.com/ShravanDeb"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="GitHub"
+          className="site-footer-link"
+        >
+          <svg viewBox="0 0 24 24" className="site-footer-icon" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 .5C5.73.5.75 5.48.75 11.76c0 5.04 3.27 9.31 7.8 10.82.57.1.78-.25.78-.55 0-.27-.01-.99-.02-1.94-3.17.69-3.84-1.53-3.84-1.53-.52-1.31-1.27-1.66-1.27-1.66-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.75 2.68 1.25 3.34.95.1-.74.4-1.25.72-1.53-2.53-.29-5.19-1.26-5.19-5.63 0-1.24.44-2.26 1.17-3.06-.12-.29-.51-1.46.11-3.04 0 0 .95-.3 3.12 1.17a10.9 10.9 0 0 1 5.68 0c2.16-1.47 3.11-1.17 3.11-1.17.62 1.58.23 2.75.11 3.04.73.8 1.17 1.82 1.17 3.06 0 4.38-2.66 5.33-5.2 5.62.41.35.77 1.03.77 2.08 0 1.5-.01 2.71-.01 3.08 0 .3.2.66.79.55a11.28 11.28 0 0 0 7.79-10.82C23.25 5.48 18.27.5 12 .5Z"/>
+          </svg>
+        </a>
+      </div>
+    </footer>
+  );
+}
+
 /* ─────────────────────── APP ROOT ──────────────────────────────────── */
 export default function App() {
   return (
@@ -515,6 +549,7 @@ export default function App() {
         <Route path="/receive/:roomId" element={<ReceivePage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
+      <SiteFooter />
     </BrowserRouter>
   );
 }
