@@ -1,0 +1,526 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap");
+@import "tailwindcss";
+
+/* ─── Design Tokens ──────────────────────────────────────────────────── */
+:root {
+  --bg:            #0d0610;
+  --bg-mid:        #180d1f;
+  --card-bg:       rgba(255,255,255,0.04);
+  --card-border:   rgba(255,160,180,0.18);
+  --glass-blur:    20px;
+
+  --rose-deep:     #ff2d6b;
+  --rose-soft:     #ff6b9d;
+  --rose-pale:     #ffb3cc;
+  --rose-blush:    rgba(255,45,107,0.08);
+  --gold:          #f5c882;
+  --gold-pale:     rgba(245,200,130,0.15);
+
+  --text-main:     #fff0f5;
+  --text-soft:     rgba(255,240,245,0.65);
+  --text-muted:    rgba(255,200,220,0.45);
+
+  --shadow-rose:   0 0 60px rgba(255,45,107,0.25);
+  --shadow-card:   0 32px 80px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,160,180,0.12);
+
+  font-family: "DM Sans", system-ui, sans-serif;
+}
+
+/* ─── Reset & Base ───────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Animated Background ─────────────────────────────────────────────── */
+.send-romance-shell,
+.app-shell {
+  position: relative;
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  overflow: hidden;
+  background: radial-gradient(ellipse 80% 70% at 50% -10%,  #3a0a2a 0%, transparent 65%),
+              radial-gradient(ellipse 60% 50% at 80% 100%,  #1f0518 0%, transparent 60%),
+              radial-gradient(ellipse 50% 40% at 10% 80%,   #200a30 0%, transparent 55%),
+              var(--bg);
+}
+
+/* Slow-drifting rose orbs */
+.send-romance-shell::before,
+.app-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle 320px at 20% 30%,  rgba(180,30,80,0.18)   0%, transparent 70%),
+    radial-gradient(circle 200px at 80% 20%,  rgba(255,100,150,0.12) 0%, transparent 70%),
+    radial-gradient(circle 280px at 70% 80%,  rgba(140,20,70,0.14)   0%, transparent 70%),
+    radial-gradient(circle 160px at 15% 75%,  rgba(200,60,110,0.10)  0%, transparent 70%);
+  animation: orb-drift 18s ease-in-out infinite alternate;
+  z-index: 0;
+}
+
+/* Grain overlay for depth */
+.send-romance-shell::after,
+.app-shell::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.038;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px;
+}
+
+@keyframes orb-drift {
+  0%   { transform: translate(0, 0) scale(1); }
+  33%  { transform: translate(30px, -20px) scale(1.05); }
+  66%  { transform: translate(-20px, 15px) scale(0.97); }
+  100% { transform: translate(10px, -10px) scale(1.02); }
+}
+
+/* ─── Cards / Panels ─────────────────────────────────────────────────── */
+.sender-panel,
+.receiver-panel,
+.share-card,
+.send-romance-card,
+.glass-panel {
+  position: relative;
+  z-index: 10;
+  background: var(--card-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  border: 1px solid var(--card-border);
+  border-radius: 28px;
+  padding: 52px 40px;
+  text-align: center;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255,180,200,0.08);
+  animation: fadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Subtle inner glow border */
+.sender-panel::before,
+.receiver-panel::before,
+.send-romance-card::before,
+.share-card::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 29px;
+  background: linear-gradient(135deg, rgba(255,100,150,0.25) 0%, transparent 50%, rgba(255,45,107,0.12) 100%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* ─── Eyebrow ─────────────────────────────────────────────────────────── */
+.eyebrow,
+.send-eyebrow {
+  display: inline-block;
+  color: var(--rose-soft);
+  font-size: 10.5px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 18px;
+  padding: 6px 14px;
+  border: 1px solid rgba(255,107,157,0.3);
+  border-radius: 999px;
+  background: rgba(255,45,107,0.08);
+}
+
+/* ─── Display Title ───────────────────────────────────────────────────── */
+.display-title,
+.send-title,
+.sender-title,
+.receiver-title {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0 0 14px;
+  line-height: 1.08;
+  font-size: clamp(36px, 7vw, 52px);
+  letter-spacing: -0.02em;
+}
+
+.send-title em {
+  font-style: italic;
+  font-weight: 400;
+  background: linear-gradient(100deg, var(--rose-deep), var(--rose-soft), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Subtitles ──────────────────────────────────────────────────────── */
+.send-subtitle,
+.sender-subtitle,
+.share-subtitle,
+.receiver-caption,
+.text-muted-token {
+  color: var(--text-soft);
+  font-size: 15px;
+  margin-bottom: 36px;
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+/* ─── Primary Button ─────────────────────────────────────────────────── */
+.send-create-btn,
+.receiver-banner-btn,
+.share-action-btn,
+.share-home-btn,
+.glass-pill {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--rose-deep) 0%, #c2185b 100%);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 15px 34px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: "DM Sans", sans-serif;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-decoration: none;
+  display: inline-block;
+  box-shadow: 0 8px 30px rgba(255,45,107,0.35);
+}
+
+.send-create-btn::after,
+.receiver-banner-btn::after,
+.share-action-btn::after,
+.share-home-btn::after,
+.glass-pill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.12), transparent);
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.send-create-btn:hover,
+.receiver-banner-btn:hover,
+.share-action-btn:hover,
+.share-home-btn:hover,
+.glass-pill:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 14px 40px rgba(255,45,107,0.45);
+}
+
+.send-create-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Secondary outline button */
+.share-open-btn {
+  background: transparent;
+  color: var(--rose-soft);
+  border: 1px solid rgba(255,107,157,0.4);
+  border-radius: 999px;
+  padding: 14px 28px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: "DM Sans", sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-block;
+  backdrop-filter: blur(8px);
+  letter-spacing: 0.03em;
+}
+
+.share-open-btn:hover {
+  background: rgba(255,45,107,0.1);
+  border-color: rgba(255,107,157,0.7);
+  transform: translateY(-2px);
+}
+
+/* ─── Heart Tap Button ───────────────────────────────────────────────── */
+.send-tap-wrap {
+  margin: 8px auto 0;
+}
+
+.sender-tap-btn,
+.send-tap-btn {
+  width: 168px;
+  height: 168px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,107,157,0.3);
+  background: radial-gradient(circle at 40% 35%, rgba(255,80,130,0.22) 0%, rgba(180,20,70,0.12) 100%);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  box-shadow:
+    0 0 0 1px rgba(255,107,157,0.15),
+    0 0 50px rgba(255,45,107,0.22),
+    0 20px 50px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,180,200,0.12);
+  transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Pulse ring */
+.sender-tap-btn::before,
+.send-tap-btn::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,107,157,0.0);
+  transition: all 0.4s ease;
+}
+
+.sender-tap-btn:hover,
+.send-tap-btn:hover {
+  transform: scale(1.07);
+  box-shadow:
+    0 0 0 1px rgba(255,107,157,0.3),
+    0 0 70px rgba(255,45,107,0.38),
+    0 24px 60px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(255,180,200,0.18);
+}
+
+.sender-tap-btn:active,
+.send-tap-btn:active {
+  transform: scale(0.94);
+}
+
+.send-btn-label {
+  color: var(--rose-pale);
+  font-size: 10px;
+  font-weight: 600;
+  margin-top: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-family: "DM Sans", sans-serif;
+}
+
+.send-heart-icon {
+  width: 52px;
+  height: 52px;
+  filter: drop-shadow(0 0 14px rgba(255,45,107,0.7));
+  transition: filter 0.2s ease, transform 0.2s ease;
+}
+
+.send-heart-icon path {
+  fill: var(--rose-deep);
+  stroke: none;
+}
+
+.sender-tap-btn:hover .send-heart-icon,
+.send-tap-btn:hover .send-heart-icon {
+  filter: drop-shadow(0 0 22px rgba(255,45,107,0.9));
+  transform: scale(1.1);
+}
+
+/* ─── Count Display ───────────────────────────────────────────────────── */
+.send-count-wrap,
+.sender-count-wrap {
+  margin-top: 36px;
+}
+
+.send-count-num,
+.sender-count-num,
+.receiver-count {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(64px, 14vw, 96px);
+  font-weight: 300;
+  line-height: 1;
+  display: block;
+  background: linear-gradient(135deg, var(--text-main) 20%, var(--rose-pale) 60%, var(--gold) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.03em;
+}
+
+.sender-count-label,
+.send-count-label {
+  color: var(--text-muted);
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: 300;
+  letter-spacing: 0.06em;
+}
+
+/* ─── Share Page ─────────────────────────────────────────────────────── */
+.share-grid {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  text-align: left;
+}
+
+.share-link-card {
+  background: rgba(255,45,107,0.06);
+  border-radius: 16px;
+  padding: 22px 20px;
+  border: 1px solid rgba(255,107,157,0.2);
+}
+
+.share-link-label {
+  color: var(--rose-soft);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-family: "DM Sans", sans-serif;
+}
+
+.share-link-value {
+  margin-top: 7px;
+  font-size: 12.5px;
+  color: var(--text-soft);
+  word-break: break-all;
+  font-family: "DM Mono", "Courier New", monospace;
+  line-height: 1.5;
+}
+
+.share-actions {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* ─── Receiver Banner ─────────────────────────────────────────────────── */
+.receiver-banner {
+  background: linear-gradient(135deg, rgba(255,45,107,0.1), rgba(140,20,70,0.08));
+  border: 1px solid rgba(255,107,157,0.25);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 28px;
+}
+
+.receiver-banner-text,
+.receiver-toast,
+.text-danger-token {
+  color: var(--rose-soft);
+  font-weight: 500;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+/* ─── Quote ──────────────────────────────────────────────────────────── */
+.send-quote {
+  position: absolute;
+  bottom: 28px;
+  left: 0;
+  right: 0;
+  color: var(--text-muted);
+  font-style: italic;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 14px;
+  font-weight: 300;
+  text-align: center;
+  letter-spacing: 0.04em;
+  z-index: 5;
+}
+
+/* ─── Floating Particles ──────────────────────────────────────────────── */
+.send-particle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 999;
+  animation: floatUp 1.4s ease-out forwards;
+  text-shadow: 0 0 10px rgba(255,45,107,0.6);
+}
+
+@keyframes floatUp {
+  0%   { opacity: 1;   transform: translateY(0)     scale(1)    rotate(var(--rot));  }
+  100% { opacity: 0;   transform: translateY(-150px) scale(0.5) rotate(var(--rot2)); }
+}
+
+/* ─── Animations ─────────────────────────────────────────────────────── */
+@keyframes fadeUp {
+  0%   { opacity: 0; transform: translateY(28px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes bump {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  14%       { transform: scale(1.15); }
+  28%       { transform: scale(1); }
+  42%       { transform: scale(1.1); }
+}
+
+.is-bumped {
+  animation: bump 0.35s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+/* ─── Divider ─────────────────────────────────────────────────────────── */
+.share-divider {
+  width: 40px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,107,157,0.4), transparent);
+  margin: 20px auto;
+}
+
+/* ─── Receiver status text ────────────────────────────────────────────── */
+.receiver-banner-status {
+  color: rgba(255,107,157,0.7);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+
+/* ─── Mobile ─────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .sender-panel,
+  .receiver-panel,
+  .share-card,
+  .send-romance-card,
+  .glass-panel {
+    padding: 36px 24px;
+    border-radius: 22px;
+  }
+
+  .share-actions {
+    flex-direction: column;
+  }
+
+  .share-action-btn,
+  .share-open-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* ─── Hide legacy noise elements ─────────────────────────────────────── */
+.ambient,
+.grain-overlay,
+.send-bg-blob,
+.send-grain-overlay {
+  display: none !important;
+}

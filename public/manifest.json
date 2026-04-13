@@ -1,0 +1,21 @@
+{
+  "name": "Tap When You Miss Me",
+  "short_name": "Miss Me",
+  "description": "A private love tap bond for couples.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fff3ea",
+  "theme_color": "#ffb5c0",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
