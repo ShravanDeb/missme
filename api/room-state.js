@@ -29,8 +29,9 @@ export default async function handler(req, res) {
     }
 
     const data = snapshot.data() ?? {};
-    const taps = typeof data.taps === "number" ? data.taps : 0;
-    return res.status(200).json({ exists: true, taps });
+    const tapsFromSend = typeof data.tapsFromSend === "number" ? data.tapsFromSend : 0;
+    const tapsFromReceive = typeof data.tapsFromReceive === "number" ? data.tapsFromReceive : 0;
+    return res.status(200).json({ exists: true, tapsFromSend, tapsFromReceive, taps: tapsFromSend + tapsFromReceive });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Could not read room state";
     return res.status(500).json({ error: message });

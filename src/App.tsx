@@ -2,10 +2,11 @@ import { useEffect, useMemo, useState, type MouseEvent } from "react";
 import { BrowserRouter, Link, Navigate, Route, Routes, useNavigate, useParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { doc, onSnapshot } from "firebase/firestore";
-import { db, requestReceiverNotifications, subscribeForegroundNotifications } from "@/lib/firebaseClient";
+import { db, requestRoomNotifications, subscribeForegroundNotifications } from "@/lib/firebaseClient";
 
 type RoomState = {
-  taps: number;
+  tapsFromSend: number;
+  tapsFromReceive: number;
   exists: boolean;
   loading: boolean;
 };
@@ -30,15 +31,17 @@ async function readApiError(response: Response, context: ApiErrorContext): Promi
 }
 
 function useRoom(roomId?: string): RoomState {
-  const [state, setState] = useState<RoomState>({ taps: 0, exists: true, loading: true });
+  const [state, setState] = useState<RoomState>({ tapsFromSend: 0, tapsFromReceive: 0, exists: true, loading: true });
 
   useEffect(() => {
-    if (!roomId) { setState({ taps: 0, exists: false, loading: false }); return; }
+    if (!roomId) { setState({ tapsFromSend: 0, tapsFromReceive: 0, exists: false, loading: false }); return; }
     const roomRef = doc(db, "rooms", roomId);
     const unsubscribe = onSnapshot(roomRef, (snapshot) => {
-      if (!snapshot.exists()) { setState({ taps: 0, exists: false, loading: false }); return; }
-      const data = snapshot.data() as { taps?: number };
-      setState({ taps: data.taps ?? 0, exists: true, loading: false });
+      if (!snapshot.exists()) { setState({ tapsFromSend: 0, tapsFromReceive: 0, exists: false, loading: false }); return; }
+      const data = snapshot.data() as { tapsFromSend?: number; tapsFromReceive?: number };
+      const tapsFromSend = typeof data.tapsFromSend === "number" ? data.tapsFromSend : 0;
+      const tapsFromReceive = typeof data.tapsFromReceive === "number" ? data.tapsFromReceive : 0;
+      setState({ tapsFromSend, tapsFromReceive, exists: true, loading: false });
     }, () => { setState((prev) => ({ ...prev, loading: false })); });
     return () => unsubscribe();
   }, [roomId]);
@@ -50,14 +53,19 @@ function useRoom(roomId?: string): RoomState {
       try {
         const response = await fetch(`/api/room-state?roomId=${encodeURIComponent(roomId)}`, { cache: "no-store" });
         if (!response.ok) return;
-        const payload = (await response.json()) as { exists?: boolean; taps?: number };
+        const payload = (await response.json()) as { exists?: boolean; tapsFromSend?: number; tapsFromReceive?: number };
         if (disposed) return;
         setState((prev) => {
-          if (!payload.exists) { if (!prev.exists && !prev.loading) return prev; return { taps: 0, exists: false, loading: false }; }
-          const remoteTaps = typeof payload.taps === "number" ? payload.taps : 0;
-          const nextTaps = Math.max(prev.taps, remoteTaps);
-          if (nextTaps === prev.taps && prev.exists && !prev.loading) return prev;
-          return { taps: nextTaps, exists: true, loading: false };
+          if (!payload.exists) {
+            if (!prev.exists && !prev.loading) return prev;
+            return { tapsFromSend: 0, tapsFromReceive: 0, exists: false, loading: false };
+          }
+          const remoteSend = typeof payload.tapsFromSend === "number" ? payload.tapsFromSend : 0;
+          const remoteReceive = typeof payload.tapsFromReceive === "number" ? payload.tapsFromReceive : 0;
+          const nextSend = Math.max(prev.tapsFromSend, remoteSend);
+          const nextReceive = Math.max(prev.tapsFromReceive, remoteReceive);
+          if (nextSend === prev.tapsFromSend && nextReceive === prev.tapsFromReceive && prev.exists && !prev.loading) return prev;
+          return { tapsFromSend: nextSend, tapsFromReceive: nextReceive, exists: true, loading: false };
         });
       } catch { /* ignore */ }
     };
@@ -287,19 +295,37 @@ function SharePage() {
 /* ─────────────────────── SEND PAGE ─────────────────────────────────── */
 function SendPage() {
   const { roomId = "" } = useParams();
-  const { taps, exists, loading } = useRoom(roomId);
-  const [localTapCount, setLocalTapCount] = useState<number | null>(null);
+  const { tapsFromSend, tapsFromReceive, exists, loading } = useRoom(roomId);
   const [isTapped, setIsTapped] = useState(false);
   const [isBumped, setIsBumped] = useState(false);
   const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; symbol: string; size: number; rot: number; rot2: number; duration: number }>>([]);
   const [error, setError] = useState("");
+  const [bannerVisible, setBannerVisible] = useState(false);
+  const [bannerText, setBannerText] = useState("Enable notifications to receive taps from this room");
+  const [toast, setToast] = useState("");
+  const [participantName, setParticipantName] = useState("");
 
-  const displayedTaps = localTapCount ?? taps;
-  const label = useMemo(() => displayedTaps.toLocaleString(), [displayedTaps]);
-  const countLabel = "times you've missed them";
+  const label = useMemo(() => tapsFromReceive.toLocaleString(), [tapsFromReceive]);
+  const countLabel = "times they missed you";
   const hearts = ["❤️", "🌸", "💗", "🌷", "💕", "✨", "🩷", "💖"];
 
-  useEffect(() => { setLocalTapCount(taps); }, [taps, roomId]);
+  useEffect(() => {
+    if (!roomId) return;
+    const key = `missme-notif-${roomId}-send`;
+    if (!localStorage.getItem(key)) setBannerVisible(true);
+    const nameKey = `missme-name-${roomId}-send`;
+    const savedName = localStorage.getItem(nameKey) || "";
+    setParticipantName(savedName);
+  }, [roomId]);
+
+  useEffect(() => {
+    let unsubscribe = () => {};
+    subscribeForegroundNotifications((payload) => {
+      const message = payload.notification?.body;
+      if (message) { setToast(message); window.setTimeout(() => setToast(""), 2600); }
+    }).then((cleanup) => { unsubscribe = cleanup; });
+    return () => unsubscribe();
+  }, []);
 
   const spawnParticles = (x: number, y: number) => {
     const total = 5 + Math.floor(Math.random() * 4);
@@ -320,12 +346,24 @@ function SendPage() {
     const rect = event.currentTarget.getBoundingClientRect();
     spawnParticles(rect.left + rect.width / 2, rect.top + rect.height / 2);
     try {
-      const response = await fetch("/api/tap", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ roomId }) });
+      const response = await fetch("/api/tap", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ roomId, fromRole: "send" }) });
       if (!response.ok) { const msg = await readApiError(response, { fallbackMessage: "Tap could not be sent" }); throw new Error(msg); }
-      const payload = (await response.json()) as { taps?: number };
-      if (typeof payload.taps === "number") setLocalTapCount(payload.taps);
       setError("");
     } catch (err) { setError(err instanceof Error ? err.message : "Tap failed."); }
+  };
+
+  const enableNotifications = async () => {
+    if (!roomId) return;
+    const name = participantName.trim();
+    if (!name) {
+      setBannerText("Please enter your name so your partner sees it in notifications.");
+      return;
+    }
+    const result = await requestRoomNotifications(roomId, "send", name);
+    localStorage.setItem(`missme-notif-${roomId}-send`, "true");
+    localStorage.setItem(`missme-name-${roomId}-send`, name);
+    setBannerVisible(false);
+    setBannerText(result.message);
   };
 
   if (!roomId) return <Navigate to="/" replace />;
@@ -338,9 +376,29 @@ function SendPage() {
 
       {!loading && exists ? (
         <section className="sender-panel">
+          {bannerVisible ? (
+            <div className="receiver-banner">
+              <p className="receiver-banner-text mb-3">
+                🔔 Enable notifications so taps from your partner reach this phone too.
+              </p>
+              <input
+                value={participantName}
+                onChange={(event) => setParticipantName(event.target.value)}
+                placeholder="Your name (e.g. Rahul)"
+                maxLength={50}
+                className="field-input"
+              />
+              <button onClick={enableNotifications} type="button" className="receiver-banner-btn">
+                Turn On Notifications
+              </button>
+            </div>
+          ) : (
+            <p className="receiver-banner-status mb-4 text-sm font-semibold">{bannerText}</p>
+          )}
+
           <p className="eyebrow">💗 Sender</p>
           <h1 className="sender-title">Tap When You<br /><em style={{ fontStyle: "italic", background: "linear-gradient(100deg,#ff2d6b,#ff6b9d,#f5c882)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Miss Them</em></h1>
-          <p className="sender-subtitle">Every tap is felt on their side, instantly.</p>
+          <p className="sender-subtitle">Both of you can tap and receive notifications in this same room.</p>
 
           {/* Tap button with rings */}
           <div className="send-tap-wrap" style={{ position: "relative", width: "168px", height: "168px", margin: "0 auto" }}>
@@ -369,6 +427,18 @@ function SendPage() {
           <div style={{ margin: "24px auto 0", height: "1px", width: "60px", background: "linear-gradient(90deg, transparent, rgba(255,107,157,0.35), transparent)" }} />
 
           {error ? <p className="text-danger-token mt-4 text-sm">{error}</p> : null}
+
+          {toast ? (
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="receiver-toast mt-4"
+              style={{ background: "rgba(255,45,107,0.1)", padding: "10px 18px", borderRadius: "999px", border: "1px solid rgba(255,107,157,0.25)", display: "inline-block" }}
+            >
+              {toast}
+            </motion.p>
+          ) : null}
         </section>
       ) : null}
 
@@ -388,15 +458,20 @@ function SendPage() {
 /* ─────────────────────── RECEIVE PAGE ──────────────────────────────── */
 function ReceivePage() {
   const { roomId = "" } = useParams();
-  const { taps, exists, loading } = useRoom(roomId);
+  const { tapsFromSend, exists, loading } = useRoom(roomId);
   const [bannerVisible, setBannerVisible] = useState(false);
   const [bannerText, setBannerText] = useState("Enable notifications to feel every tap");
   const [toast, setToast] = useState("");
+  const [tapError, setTapError] = useState("");
+  const [participantName, setParticipantName] = useState("");
 
   useEffect(() => {
     if (!roomId) return;
-    const key = `missme-notif-${roomId}`;
+    const key = `missme-notif-${roomId}-receive`;
     if (!localStorage.getItem(key)) setBannerVisible(true);
+    const nameKey = `missme-name-${roomId}-receive`;
+    const savedName = localStorage.getItem(nameKey) || "";
+    setParticipantName(savedName);
   }, [roomId]);
 
   useEffect(() => {
@@ -410,10 +485,34 @@ function ReceivePage() {
 
   const enableNotifications = async () => {
     if (!roomId) return;
-    const result = await requestReceiverNotifications(roomId);
-    localStorage.setItem(`missme-notif-${roomId}`, "true");
+    const name = participantName.trim();
+    if (!name) {
+      setBannerText("Please enter your name so your partner sees it in notifications.");
+      return;
+    }
+    const result = await requestRoomNotifications(roomId, "receive", name);
+    localStorage.setItem(`missme-notif-${roomId}-receive`, "true");
+    localStorage.setItem(`missme-name-${roomId}-receive`, name);
     setBannerVisible(false);
     setBannerText(result.message);
+  };
+
+  const sendTapFromReceiver = async () => {
+    if (!roomId) return;
+    try {
+      const response = await fetch("/api/tap", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ roomId, fromRole: "receive" })
+      });
+      if (!response.ok) {
+        const msg = await readApiError(response, { fallbackMessage: "Tap could not be sent" });
+        throw new Error(msg);
+      }
+      setTapError("");
+    } catch (err) {
+      setTapError(err instanceof Error ? err.message : "Tap failed.");
+    }
   };
 
   if (!roomId) return <Navigate to="/" replace />;
@@ -427,6 +526,13 @@ function ReceivePage() {
             <p className="receiver-banner-text mb-3">
               🔔 Enable push notifications so every tap reaches you instantly.
             </p>
+            <input
+              value={participantName}
+              onChange={(event) => setParticipantName(event.target.value)}
+              placeholder="Your name (e.g. Aisha)"
+              maxLength={50}
+              className="field-input"
+            />
             <button onClick={enableNotifications} type="button" className="receiver-banner-btn">
               Turn On Notifications
             </button>
@@ -446,20 +552,30 @@ function ReceivePage() {
               <em style={{ fontStyle: "italic", background: "linear-gradient(100deg,#ff2d6b,#ff6b9d,#f5c882)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Of You</em>
             </h1>
 
-            <AnimatePresence mode="wait">
-              <motion.p
-                key={taps}
-                initial={{ opacity: 0.15, y: 12, scale: 0.94 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0.2, y: -8 }}
-                transition={{ duration: 0.35, ease: [0.34, 1.56, 0.64, 1] }}
-                className="receiver-count"
-              >
-                {taps.toLocaleString()}
-              </motion.p>
-            </AnimatePresence>
+            <div className="receiver-count-wrap">
+              <AnimatePresence mode="wait">
+                <motion.p
+                  key={tapsFromSend}
+                  initial={{ opacity: 0.15, y: 12, scale: 0.94 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0.2, y: -8 }}
+                  transition={{ duration: 0.35, ease: [0.34, 1.56, 0.64, 1] }}
+                  className="receiver-count"
+                >
+                  {tapsFromSend.toLocaleString()}
+                </motion.p>
+              </AnimatePresence>
+            </div>
 
             <p className="receiver-caption mt-2">times they thought of you</p>
+
+            <div style={{ marginTop: "18px" }}>
+              <button onClick={sendTapFromReceiver} type="button" className="receiver-banner-btn">
+                Tap Back
+              </button>
+            </div>
+
+            {tapError ? <p className="text-danger-token mt-4 text-sm">{tapError}</p> : null}
 
             {/* Decorative hearts row */}
             <div style={{ display: "flex", justifyContent: "center", gap: "8px", marginTop: "20px", opacity: 0.45 }}>

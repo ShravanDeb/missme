@@ -22,7 +22,11 @@ async function getMessagingClient() {
   return getMessaging(firebaseApp);
 }
 
-export async function requestReceiverNotifications(roomId: string): Promise<{ ok: boolean; message: string }> {
+export async function requestRoomNotifications(
+  roomId: string,
+  role: "send" | "receive",
+  name?: string
+): Promise<{ ok: boolean; message: string }> {
   const client = await getMessagingClient();
   if (!client) {
     return { ok: false, message: "Push notifications are not supported on this device." };
@@ -46,7 +50,7 @@ export async function requestReceiverNotifications(roomId: string): Promise<{ ok
   const response = await fetch("/api/save-token", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ roomId, token })
+    body: JSON.stringify({ roomId, token, role, name })
   });
 
   if (!response.ok) {
@@ -55,6 +59,8 @@ export async function requestReceiverNotifications(roomId: string): Promise<{ ok
 
   return { ok: true, message: "Notifications are enabled for this bond." };
 }
+
+export const requestReceiverNotifications = (roomId: string) => requestRoomNotifications(roomId, "receive");
 
 export async function subscribeForegroundNotifications(
   callback: (payload: MessagePayload) => void

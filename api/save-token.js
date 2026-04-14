@@ -19,9 +19,9 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { roomId, token } = parseBody(req);
-  if (!roomId || !token) {
-    return res.status(400).json({ error: "roomId and token are required" });
+  const { roomId, token, role, name } = parseBody(req);
+  if (!roomId || !token || (role !== "send" && role !== "receive")) {
+    return res.status(400).json({ error: "roomId, token and valid role are required" });
   }
 
   try {
@@ -33,9 +33,13 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: "Room not found" });
     }
 
+    const tokenField = role === "send" ? "sendTokens" : "receiveTokens";
+    const nameField = role === "send" ? "sendName" : "receiveName";
+    const safeName = typeof name === "string" ? name.trim().slice(0, 50) : "";
     await roomRef.set(
       {
-        receiverToken: token,
+        [tokenField]: admin.firestore.FieldValue.arrayUnion(token),
+        ...(safeName ? { [nameField]: safeName } : {}),
         tokenUpdatedAt: admin.firestore.FieldValue.serverTimestamp()
       },
       { merge: true }

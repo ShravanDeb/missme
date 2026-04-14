@@ -24,8 +24,12 @@ export default async function handler(req, res) {
     const db = getFirestoreAdmin();
 
     await db.collection("rooms").doc(roomId).set({
-      taps: 0,
-      receiverToken: null,
+      tapsFromSend: 0,
+      tapsFromReceive: 0,
+      sendTokens: [],
+      receiveTokens: [],
+      sendName: "",
+      receiveName: "",
       createdAt: admin.firestore.FieldValue.serverTimestamp()
     });
 

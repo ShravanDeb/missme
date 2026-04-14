@@ -2,8 +2,8 @@
 
 This project is a full-stack Vercel-ready app where each couple gets an isolated private room:
 
-- Sender page: `/send/:roomId` to tap a heart
-- Receiver page: `/receive/:roomId` to watch a live counter
+- Sender page: `/send/:roomId` to tap and subscribe for notifications
+- Receiver page: `/receive/:roomId` to watch the live counter, tap back, and subscribe for notifications
 - Share page: `/share/:roomId` with both links
 - API endpoints: `/api/create-room`, `/api/tap`, `/api/save-token`
 
@@ -62,13 +62,15 @@ service cloud.firestore {
 4. On phone A, enable notifications when prompted.
 5. On phone B, tap the heart.
 6. Verify:
-   - Receiver counter updates instantly without refresh.
-   - Receiver gets push notifications for each tap.
-   - A different room ID does not affect this room.
+  - Counter updates instantly without refresh.
+  - Both phones can subscribe for push notifications in the same room.
+  - Either phone can tap in the same room.
+  - A different room ID does not affect this room.
 
 ## API Contract
 
 - `POST /api/create-room` -> `{ roomId, sendLink, receiveLink }`
-- `GET /api/room-state?roomId=...` -> `{ exists, taps }` for fast sync fallback
-- `POST /api/tap` body `{ roomId }` -> increments Firestore counter and pushes receiver notification
-- `POST /api/save-token` body `{ roomId, token }` -> stores receiver FCM token
+- `GET /api/room-state?roomId=...` -> `{ exists, tapsFromSend, tapsFromReceive, taps }` for fast sync fallback
+- `POST /api/tap` body `{ roomId, fromRole }` where `fromRole` is `send` or `receive`
+- `POST /api/save-token` body `{ roomId, token, role, name? }` where `role` is `send` or `receive`
+  - if `name` is saved, notification body becomes `"<name> is missing you"`
