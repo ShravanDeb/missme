@@ -40,6 +40,132 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ─── Opening Loader ─────────────────────────────────────────────────── */
+.opening-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 28px;
+  background:
+    radial-gradient(circle 520px at 18% 20%, rgba(255, 85, 140, 0.16) 0%, transparent 72%),
+    radial-gradient(circle 440px at 86% 90%, rgba(245, 200, 130, 0.13) 0%, transparent 72%),
+    linear-gradient(160deg, #130716 0%, #0d0610 46%, #15081f 100%);
+  overflow: hidden;
+}
+
+.opening-loader-orb {
+  position: absolute;
+  width: 58vmax;
+  height: 58vmax;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 70, 124, 0.2) 0%, rgba(255, 70, 124, 0) 68%);
+  filter: blur(6px);
+  animation: openingOrbDrift 6s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+.opening-loader-eyebrow {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 12px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 140, 178, 0.34);
+  background: rgba(255, 45, 107, 0.12);
+  color: rgba(255, 182, 206, 0.88);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-weight: 600;
+}
+
+.opening-loader-title {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(42px, 8vw, 74px);
+  line-height: 0.98;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: #fff4f8;
+  text-shadow: 0 8px 34px rgba(255, 45, 107, 0.26);
+}
+
+.opening-loader-pulse {
+  position: relative;
+  z-index: 1;
+  margin-top: 22px;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 129, 173, 0.4);
+  background: radial-gradient(circle at 38% 34%, rgba(255, 88, 145, 0.26) 0%, rgba(115, 14, 50, 0.12) 100%);
+  box-shadow: 0 0 0 0 rgba(255, 76, 134, 0.5);
+  animation: openingHeartPulse 1.5s ease-out infinite;
+}
+
+.opening-loader-pulse span {
+  font-size: 33px;
+  color: #ff7aa8;
+  text-shadow: 0 0 16px rgba(255, 75, 138, 0.62);
+  animation: openingHeartBeat 1.5s ease-in-out infinite;
+}
+
+.opening-loader-subtitle {
+  position: relative;
+  z-index: 1;
+  margin: 18px 0 0;
+  color: rgba(255, 214, 228, 0.74);
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@keyframes openingHeartPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 76, 134, 0.48);
+  }
+  75% {
+    box-shadow: 0 0 0 18px rgba(255, 76, 134, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 76, 134, 0);
+  }
+}
+
+@keyframes openingHeartBeat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.14);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes openingOrbDrift {
+  0% {
+    transform: translate(-12%, -8%) scale(0.95);
+  }
+  100% {
+    transform: translate(10%, 8%) scale(1.08);
+  }
+}
+
 /* ─── Animated Background ─────────────────────────────────────────────── */
 .send-romance-shell,
 .app-shell {
@@ -621,6 +747,24 @@ body {
 
 /* ─── Mobile ─────────────────────────────────────────────────────────── */
 @media (max-width: 480px) {
+  .opening-loader {
+    padding: 20px;
+  }
+
+  .opening-loader-title {
+    font-size: clamp(34px, 12vw, 48px);
+  }
+
+  .opening-loader-pulse {
+    width: 74px;
+    height: 74px;
+  }
+
+  .opening-loader-subtitle {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+  }
+
   .sender-panel,
   .receiver-panel,
   .share-card,

@@ -693,8 +693,69 @@ function RewardPage() {
   );
 }
 
+function OpeningLoader() {
+  return (
+    <motion.div
+      className="opening-loader"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+    >
+      <div className="opening-loader-orb" aria-hidden="true" />
+      <p className="opening-loader-eyebrow">connecting hearts</p>
+      <h1 className="opening-loader-title">Tap When You Miss Me</h1>
+      <div className="opening-loader-pulse" aria-hidden="true">
+        <span>♥</span>
+      </div>
+      <p className="opening-loader-subtitle">Opening your private room...</p>
+    </motion.div>
+  );
+}
+
 /* ─────────────────────── APP ROOT ──────────────────────────────────── */
 export default function App() {
+  const [showOpeningLoader, setShowOpeningLoader] = useState(true);
+
+  useEffect(() => {
+    let minDelayDone = false;
+    let pageLoaded = typeof document !== "undefined" ? document.readyState === "complete" : true;
+    let cancelled = false;
+
+    const tryFinish = () => {
+      if (!cancelled && minDelayDone && pageLoaded) setShowOpeningLoader(false);
+    };
+
+    const minDelayTimer = window.setTimeout(() => {
+      minDelayDone = true;
+      tryFinish();
+    }, 3000);
+
+    const onLoad = () => {
+      pageLoaded = true;
+      tryFinish();
+    };
+
+    if (!pageLoaded) window.addEventListener("load", onLoad, { once: true });
+
+    // Handle quick cached loads where the event has already fired.
+    onLoad();
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(minDelayTimer);
+      window.removeEventListener("load", onLoad);
+    };
+  }, []);
+
+  if (showOpeningLoader) {
+    return (
+      <AnimatePresence>
+        <OpeningLoader />
+      </AnimatePresence>
+    );
+  }
+
   return (
     <BrowserRouter>
       <Routes>
