@@ -827,3 +827,21 @@ body {
   color: rgba(255, 206, 222, 0.76);
   font-size: 13px;
 }
+
+/* Keep mobile footer/quote in normal flow (must be after base footer rules). */
+@media (max-width: 768px) {
+  .site-footer {
+    position: static;
+    margin: 14px auto 0;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    z-index: 12;
+  }
+
+  .send-quote {
+    position: static;
+    margin: 18px auto 0;
+    max-width: min(92vw, 520px);
+  }
+}
