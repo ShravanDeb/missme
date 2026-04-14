@@ -200,6 +200,10 @@ function HomePage() {
         </p>
       </section>
 
+      <Link to="/reward" className="reward-float-cta" aria-label="Open reward page">
+        <span>✨ Want to give me a reward?</span>
+      </Link>
+
       <p className="send-quote">"distance means so little when someone means so much"</p>
     </main>
   );
@@ -507,7 +511,7 @@ function NotFoundPage() {
 function SiteFooter() {
   return (
     <footer className="site-footer">
-      <p className="site-footer-text">Created by Shravan Deb</p>
+      <p className="site-footer-credit">Created by Shravan Deb</p>
       <div className="site-footer-links" aria-label="Social links">
         <a
           href="https://instagram.com/shravnnn.d"
@@ -538,6 +542,41 @@ function SiteFooter() {
   );
 }
 
+function RewardPage() {
+  const [qrError, setQrError] = useState(false);
+
+  return (
+    <main className="app-shell px-5 py-8">
+      <FloatingHearts />
+      <section className="reward-panel">
+        <p className="eyebrow">Support</p>
+        <h1 className="display-title reward-title">Want to Give me a reward?</h1>
+        <p className="reward-subtitle">
+          If this project helped you, you can support my work by scanning the QR code below.
+        </p>
+
+        <div className="reward-qr-frame">
+          {!qrError ? (
+            <img
+              src="/reward-qr.jpg"
+              alt="Reward payment QR code"
+              className="reward-qr"
+              onError={() => setQrError(true)}
+            />
+          ) : (
+            <div className="reward-qr-fallback">
+              <p>QR code not found.</p>
+              <p>Add your file as /public/reward-qr.svg or /public/reward-qr.png</p>
+            </div>
+          )}
+        </div>
+
+        <p className="reward-note">Thank you for your support.</p>
+      </section>
+    </main>
+  );
+}
+
 /* ─────────────────────── APP ROOT ──────────────────────────────────── */
 export default function App() {
   return (
@@ -547,6 +586,7 @@ export default function App() {
         <Route path="/share/:roomId" element={<SharePage />} />
         <Route path="/send/:roomId" element={<SendPage />} />
         <Route path="/receive/:roomId" element={<ReceivePage />} />
+        <Route path="/reward" element={<RewardPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
       <SiteFooter />
