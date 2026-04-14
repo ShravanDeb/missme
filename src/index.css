@@ -614,6 +614,79 @@ body {
   }
 }
 
+@media (max-width: 768px) {
+  .send-romance-shell,
+  .app-shell {
+    justify-content: flex-start;
+    padding: max(16px, env(safe-area-inset-top)) 16px max(128px, env(safe-area-inset-bottom) + 96px);
+  }
+
+  .sender-panel,
+  .receiver-panel,
+  .share-card,
+  .send-romance-card,
+  .glass-panel,
+  .reward-panel {
+    width: min(100%, 560px);
+    padding: 30px 20px;
+    border-radius: 22px;
+  }
+
+  .send-create-btn,
+  .receiver-banner-btn,
+  .share-home-btn,
+  .share-action-btn,
+  .share-open-btn,
+  .glass-pill {
+    min-height: 48px;
+    width: min(100%, 320px);
+    padding: 12px 20px;
+  }
+
+  .send-tap-wrap {
+    width: 154px !important;
+    height: 154px !important;
+  }
+
+  .sender-tap-btn,
+  .send-tap-btn {
+    width: 154px;
+    height: 154px;
+  }
+
+  .reward-float-cta {
+    position: fixed;
+    left: 50%;
+    bottom: max(12px, env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    width: min(92vw, 360px);
+    justify-content: center;
+    padding: 12px 14px;
+    z-index: 70;
+  }
+
+  .reward-float-cta:hover {
+    transform: translateX(-50%);
+  }
+
+  .send-quote {
+    position: static;
+    margin: 14px auto 0;
+    max-width: min(92vw, 520px);
+    font-size: 16px;
+    line-height: 1.25;
+    text-align: center;
+  }
+
+  .site-footer {
+    position: static;
+    margin: 12px auto 0;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
+
 /* ─── Hide legacy noise elements ─────────────────────────────────────── */
 .ambient,
 .grain-overlay,
