@@ -759,29 +759,32 @@ body {
 
 .site-footer {
   position: fixed;
-  right: max(12px, env(safe-area-inset-right));
-  bottom: max(12px, env(safe-area-inset-bottom));
+  left: max(12px, env(safe-area-inset-left));
+  top: max(12px, env(safe-area-inset-top));
+  right: auto;
+  bottom: auto;
   transform: none;
   z-index: 50;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-shrink: 0;
   white-space: nowrap;
 }
 
 .site-footer-credit {
   margin: 0;
-  color: rgba(255, 230, 240, 0.72);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
+  color: rgba(255, 236, 244, 0.96);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.015em;
   text-shadow: none;
-  padding: 7px 11px;
+  padding: 8px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 125, 169, 0.18);
-  background: rgba(12, 6, 28, 0.52);
-  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 125, 169, 0.36);
+  background: rgba(18, 9, 34, 0.82);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(10px);
 }
 
 .site-footer-links {
@@ -790,32 +793,34 @@ body {
   gap: 6px;
   padding: 4px 6px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 125, 169, 0.16);
-  background: rgba(12, 6, 28, 0.48);
-  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 125, 169, 0.3);
+  background: rgba(18, 9, 34, 0.78);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
 }
 
 .site-footer-link {
-  width: 24px;
-  height: 24px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   display: grid;
   place-items: center;
-  color: rgba(255, 159, 190, 0.82);
-  border: 1px solid rgba(255, 107, 157, 0.14);
-  background: rgba(255, 45, 107, 0.04);
+  color: rgba(255, 199, 220, 0.98);
+  border: 1px solid rgba(255, 107, 157, 0.34);
+  background: rgba(255, 45, 107, 0.14);
   transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
 }
 
 .site-footer-link:hover {
-  transform: translateY(-0.5px);
-  background: rgba(255, 45, 107, 0.1);
-  color: rgba(255, 194, 214, 0.92);
+  transform: translateY(-0.5px) scale(1.03);
+  background: rgba(255, 45, 107, 0.24);
+  color: #fff4f9;
 }
 
 .site-footer-icon {
-  width: 12px;
-  height: 12px;
+  width: 15px;
+  height: 15px;
+  display: block;
 }
 
 .reward-panel {
@@ -881,6 +886,15 @@ body {
     justify-content: center;
     flex-wrap: wrap;
     z-index: 12;
+  }
+
+  .site-footer-credit {
+    font-size: 12px;
+  }
+
+  .site-footer-link {
+    width: 32px;
+    height: 32px;
   }
 }
 
