@@ -617,7 +617,7 @@ body {
   .send-romance-shell,
   .app-shell {
     justify-content: flex-start;
-    padding: max(16px, env(safe-area-inset-top)) 16px max(128px, env(safe-area-inset-bottom) + 96px);
+    padding: max(74px, env(safe-area-inset-top) + 56px) 16px max(128px, env(safe-area-inset-bottom) + 96px);
   }
 
   .sender-panel,
@@ -627,8 +627,26 @@ body {
   .glass-panel,
   .reward-panel {
     width: min(100%, 560px);
-    padding: 30px 20px;
+    padding: 28px 20px;
     border-radius: 22px;
+  }
+
+  .send-title,
+  .sender-title,
+  .receiver-title {
+    font-size: clamp(44px, 11.2vw, 58px);
+    line-height: 1.03;
+    margin-bottom: 12px;
+  }
+
+  .send-subtitle,
+  .sender-subtitle,
+  .share-subtitle,
+  .receiver-caption,
+  .text-muted-token {
+    font-size: 17px;
+    line-height: 1.45;
+    margin-bottom: 28px;
   }
 
   .send-create-btn,
@@ -654,10 +672,15 @@ body {
   }
 
   .reward-float-cta {
-    top: max(12px, env(safe-area-inset-top));
-    right: max(12px, env(safe-area-inset-right));
+    top: max(8px, env(safe-area-inset-top));
+    right: max(10px, env(safe-area-inset-right));
     width: auto;
-    padding: 12px 14px;
+    font-size: 10.5px;
+    letter-spacing: 0.02em;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: linear-gradient(120deg, rgba(255, 107, 157, 0.24), rgba(245, 200, 130, 0.2));
+    backdrop-filter: blur(10px);
   }
 
   .reward-float-cta:hover {
@@ -666,9 +689,9 @@ body {
 
   .send-quote {
     position: static;
-    margin: 14px auto 0;
+    margin: 18px auto 0;
     max-width: min(92vw, 520px);
-    font-size: 16px;
+    font-size: 17px;
     line-height: 1.25;
     text-align: center;
   }
